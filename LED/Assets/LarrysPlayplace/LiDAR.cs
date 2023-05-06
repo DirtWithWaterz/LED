@@ -37,12 +37,11 @@ public class LiDAR : MonoBehaviour
         {
             if (mode == 0) { ConeScan(); }
             else if (mode == 1) { LineScan(); }
-            else if (mode == 2) { SpiralScan(); }
         }
 
         if (UserInput.instance.FlashlightModePressed)
         {
-            if (mode >= 2)
+            if (mode >= 1)
             {
                 mode = 0;
             }
@@ -52,38 +51,38 @@ public class LiDAR : MonoBehaviour
             }
         }
     }
-    void SpiralScan()
-    {
-        Vector3 forward = cam.transform.forward;
-        Quaternion startRotation = Quaternion.AngleAxis(-coneAngle / 2, transform.up);
+    // void SpiralScan()
+    // {
+    //     Vector3 forward = cam.transform.forward;
+    //     Quaternion startRotation = Quaternion.AngleAxis(-coneAngle / 2, transform.up);
 
-        for (int i = 0; i < numberOfRays; i++)
-        {
-            float inclination = Mathf.Acos(1 - i / (numberOfRays - 1f) * (1 - Mathf.Cos(coneAngle * Mathf.Deg2Rad)));
-            float azimuth = 2 * Mathf.PI * i / numberOfRays;
+    //     for (int i = 0; i < numberOfRays; i++)
+    //     {
+    //         float inclination = Mathf.Acos(1 - i / (numberOfRays - 1f) * (1 - Mathf.Cos(coneAngle * Mathf.Deg2Rad)));
+    //         float azimuth = 2 * Mathf.PI * i / numberOfRays;
 
-            float x = Mathf.Sin(inclination) * Mathf.Cos(azimuth);
-            float y = Mathf.Sin(inclination) * Mathf.Sin(azimuth);
-            float z = Mathf.Cos(inclination);
+    //         float x = Mathf.Sin(inclination) * Mathf.Cos(azimuth);
+    //         float y = Mathf.Sin(inclination) * Mathf.Sin(azimuth);
+    //         float z = Mathf.Cos(inclination);
 
-            Vector3 direction = new Vector3(x, y, z);
-            direction = transform.rotation * startRotation * direction;
+    //         Vector3 direction = new Vector3(x, y, z);
+    //         direction = transform.rotation * startRotation * direction;
 
-            Ray ray = new Ray(transform.position, direction);
-            RaycastHit hit;
+    //         Ray ray = new Ray(transform.position, direction);
+    //         RaycastHit hit;
 
-            if (Physics.Raycast(ray, out hit, maxDistance, layerMask))
-            {
-                DrawLine(hit.point);
-                Debug.DrawLine(ray.origin, hit.point, Color.green);
-                PlaceDot(hit.point, choice >= 5f ? new Color(0, 151, 255, 255) : new Color(0, 255, 242, 255));
-            }
-            else
-            {
-                Debug.DrawRay(ray.origin, direction * maxDistance, Color.red);
-            }
-        }
-    }
+    //         if (Physics.Raycast(ray, out hit, maxDistance, layerMask))
+    //         {
+    //             DrawLine(hit.point);
+    //             Debug.DrawLine(ray.origin, hit.point, Color.green);
+    //             PlaceDot(hit.point, choice >= 5f ? new Color(0, 151, 255, 255) : new Color(0, 255, 242, 255));
+    //         }
+    //         else
+    //         {
+    //             Debug.DrawRay(ray.origin, direction * maxDistance, Color.red);
+    //         }
+    //     }
+    // }
 
     void LineScan() {
         float currentAngle = Mathf.Lerp(lineScanMinAngle, lineScanMaxAngle, Mathf.PingPong(Time.time * lineScanSpeed, 1f));
