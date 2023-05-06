@@ -9,7 +9,7 @@
 // <author>developer@photonengine.com</author>
 // ----------------------------------------------------------------------------
 
-
+#pragma warning disable 0219
 #if UNITY_4_7 || UNITY_5 || UNITY_5_3_OR_NEWER
 #define SUPPORTED_UNITY
 #endif
@@ -712,3 +712,4 @@ namespace Photon.Realtime
     }
     #endif
 }
+#pragma warning restore 0219
