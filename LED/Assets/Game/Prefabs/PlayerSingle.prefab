@@ -278,7 +278,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.03137255, g: 0.03529412, b: 0.03137255, a: 1}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -328,15 +328,19 @@ MonoBehaviour:
   line: {fileID: 592428022468944590, guid: c3fcba40e7c0f774a9ffcca7a33bf561, type: 3}
   numberOfRays: 100
   coneAngle: 45
-  maxDistance: 10
+  maxDistance: 1000
   layerMask:
     serializedVersion: 2
-    m_Bits: 49344
-  lineScanMinAngle: 0
-  lineScanMaxAngle: 65
+    m_Bits: 49600
+  lineScanMinAngleUD: 0
+  lineScanMaxAngleUD: 80
+  lineScanMinAngleLR: -5
+  lineScanMaxAngleLR: 92
   lineScanSpeed: 0.5
   lineScanNumberOfRays: 100
-  lineScanConeAngle: 80
+  lineScanConeAngleUD: 90
+  lineScanConeAngleLR: 85
+  particleSize: 0.006
 --- !u!1 &5854894591025238244
 GameObject:
   m_ObjectHideFlags: 0
@@ -445,7 +449,7 @@ GameObject:
   - component: {fileID: 5854894591901824924}
   - component: {fileID: 5854894591901824994}
   - component: {fileID: 5854894591901824925}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: LiDAR Particle System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -720,7 +724,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 3
       scalar: 0.1
-      minScalar: 0.006
+      minScalar: 0.003
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -5195,7 +5199,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10301, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: f7413a486d3322c4e84d5cc2b23ac2fa, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

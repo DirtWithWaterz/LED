@@ -5,16 +5,20 @@ TagManager:
   serializedVersion: 2
   tags:
   - Listenable
+  - Surroundings
+  - Interactables
+  - Objects
+  - Organics
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Particles
   - Water
   - UI
   - Floor
   - Wall
-  - 
+  - Organic
   - 
   - 
   - 

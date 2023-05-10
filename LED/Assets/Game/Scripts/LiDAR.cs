@@ -1,4 +1,5 @@
 #pragma warning disable 0618
+using System.Collections;
 using mudz;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -18,13 +19,19 @@ public class LiDAR : MonoBehaviour
     public float maxDistance = 10f;
     public LayerMask layerMask;
 
+    private Coroutine lineScanCoroutine;
     Vector3 noVelocity = new Vector3(0, 0, 0);
 
-    [SerializeField] private float lineScanMinAngle = -35f;
-    [SerializeField] private float lineScanMaxAngle = 35f;
+    [SerializeField] private float lineScanMinAngleUD = 0f;
+    [SerializeField] private float lineScanMaxAngleUD = 65f;
+
+    [SerializeField] private float lineScanMinAngleLR = 0f;
+    [SerializeField] private float lineScanMaxAngleLR = 70f;
+
     [SerializeField] private float lineScanSpeed = 10f;
     public int lineScanNumberOfRays = 10;
-    public float lineScanConeAngle = 45f;
+    public float lineScanConeAngleUD = 100f;
+    public float lineScanConeAngleLR = 85f;
 
     void Awake(){
         cam = GetComponent<Camera>();
@@ -32,11 +39,24 @@ public class LiDAR : MonoBehaviour
 
     void Update(){
         choice = Random.Range(0, 11);
-        Debug.Log(choice);
+        // Debug.Log(choice);
         if (Mouse.current.leftButton.isPressed)
         {
             if (mode == 0) { ConeScan(); }
-            else if (mode == 1) { LineScan(); }
+        }
+        if(Mouse.current.leftButton.wasPressedThisFrame){
+            if (mode == 1){ 
+                if(lineScanCoroutine == null){
+                    lineScanCoroutine = StartCoroutine(LineScan());
+                }
+            }
+        } if(Mouse.current.leftButton.wasReleasedThisFrame){
+            if(mode == 1){
+                if(lineScanCoroutine != null){
+                    StopCoroutine(lineScanCoroutine);
+                    lineScanCoroutine = null;
+                }
+            }
         }
 
         if (UserInput.instance.FlashlightModePressed)
@@ -75,7 +95,13 @@ public class LiDAR : MonoBehaviour
     //         {
     //             DrawLine(hit.point);
     //             Debug.DrawLine(ray.origin, hit.point, Color.green);
-    //             PlaceDot(hit.point, choice >= 5f ? new Color(0, 151, 255, 255) : new Color(0, 255, 242, 255));
+    //             PlaceDot(
+    //                  hit.point, 
+    //                  choice >= 5f && hit.transform.gameObject.tag == "Surroundings" ? Color.blue : 
+    //                  choice <= 6f && hit.transform.gameObject.tag == "Surroundings" ? Color.cyan :
+    //                  choice >= 5f && hit.transform.gameObject.tag == "Organics" ? Color.red : 
+    //                  Color.red
+    //              );
     //         }
     //         else
     //         {
@@ -84,30 +110,78 @@ public class LiDAR : MonoBehaviour
     //     }
     // }
 
-    void LineScan() {
-        float currentAngle = Mathf.Lerp(lineScanMinAngle, lineScanMaxAngle, Mathf.PingPong(Time.time * lineScanSpeed, 1f));
-        Vector3 forward = cam.transform.forward;
-        Quaternion startRotation = Quaternion.AngleAxis(-lineScanConeAngle / 2, cam.transform.right);
-        Quaternion currentRotation = Quaternion.AngleAxis(currentAngle, cam.transform.right);
 
-        for (int i = 0; i < lineScanNumberOfRays; i++) {
-            float angleStep = lineScanConeAngle / (lineScanNumberOfRays - 1);
-            Quaternion rayRotation = Quaternion.AngleAxis(angleStep * i - (lineScanConeAngle / 2), cam.transform.up) * currentRotation;
-            Vector3 direction = rayRotation * startRotation * forward;
+private IEnumerator LineScan()
+{
+    while (true)
+    {
+        // Up to down movement
+        for (float currentAngleUpDown = lineScanMinAngleUD; currentAngleUpDown <= lineScanMaxAngleUD; currentAngleUpDown += lineScanSpeed)
+        {
+            ScanAtAngle(currentAngleUpDown, true);
+            yield return null;
+        }
 
-            Ray ray = new Ray(transform.position, direction);
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit, maxDistance, layerMask)) {
-                DrawLine(hit.point);
-                Debug.DrawLine(ray.origin, hit.point, Color.green);
-                PlaceDot(hit.point, choice >= 5f ? Color.blue : Color.cyan);
-            }
-            else {
-                Debug.DrawRay(ray.origin, direction * maxDistance, Color.red);
-            }
+        // Left to right movement
+        for (float currentAngleLeftRight = lineScanMinAngleLR; currentAngleLeftRight <= lineScanMaxAngleLR; currentAngleLeftRight += lineScanSpeed)
+        {
+            ScanAtAngle(currentAngleLeftRight, false);
+            yield return null;
         }
     }
+}
+
+private void ScanAtAngle(float currentAngle, bool isUpDown){
+    Vector3 forward = cam.transform.forward;
+    Quaternion startRotationUpDown = Quaternion.AngleAxis(-lineScanConeAngleUD / 2, cam.transform.right);
+    Quaternion startRotationLeftRight = Quaternion.AngleAxis(-lineScanConeAngleLR / 2, cam.transform.up);
+    Quaternion currentRotationUpDown = Quaternion.AngleAxis(currentAngle, cam.transform.right);
+    Quaternion currentRotationLeftRight = Quaternion.AngleAxis(currentAngle, cam.transform.up);
+
+    for (int i = 0; i < lineScanNumberOfRays; i++){
+        float angleStepUD = lineScanConeAngleUD / (lineScanNumberOfRays - 1);
+        float angleStepLR = lineScanConeAngleLR / (lineScanNumberOfRays - 1);
+        float randomOffset = Random.Range(-0.07f, 0.07f);
+        angleStepUD += randomOffset;
+        angleStepLR += randomOffset;
+        Mathf.Clamp(angleStepLR, lineScanMinAngleLR, lineScanMaxAngleLR);
+        Mathf.Clamp(angleStepUD, lineScanMinAngleUD, lineScanMaxAngleUD);
+
+        Quaternion rayRotationUpDown = Quaternion.AngleAxis(angleStepUD * i - (lineScanConeAngleUD / 2), cam.transform.up) * currentRotationUpDown;
+        Quaternion rayRotationLeftRight = Quaternion.AngleAxis(angleStepLR * i - (lineScanConeAngleLR / 2), cam.transform.right) * currentRotationLeftRight;
+        Vector3 directionUpDown = rayRotationUpDown * startRotationUpDown * forward;
+        Vector3 directionLeftRight = rayRotationLeftRight * startRotationLeftRight * forward;
+
+        if (isUpDown){
+            RaycastAndDraw(directionUpDown);
+        } else{
+            RaycastAndDraw(directionLeftRight);
+        }
+    }
+}
+
+private void RaycastAndDraw(Vector3 direction)
+{
+    Ray ray = new Ray(transform.position, direction);
+    RaycastHit hit;
+
+    if (Physics.Raycast(ray, out hit, maxDistance, layerMask))
+    {
+        DrawLine(hit.point);
+        Debug.DrawLine(ray.origin, hit.point, Color.green);
+        PlaceDot(
+            hit.point, 
+            choice >= 5f && hit.transform.gameObject.tag == "Surroundings" ? Color.blue : 
+            choice <= 6f && hit.transform.gameObject.tag == "Surroundings" ? Color.cyan :
+            choice >= 5f && hit.transform.gameObject.tag == "Organics" ? Color.red : 
+            Color.red
+        );
+    }
+    else
+    {
+        Debug.DrawRay(ray.origin, direction * maxDistance, Color.red);
+    }
+}
 
     void ConeScan(){
         Vector3 forward = cam.transform.forward;
@@ -131,7 +205,13 @@ public class LiDAR : MonoBehaviour
             {
                 DrawLine(hit.point);
                 Debug.DrawLine(ray.origin, hit.point, Color.green);
-                PlaceDot(hit.point, choice >= 5f ? Color.blue : Color.cyan);
+                PlaceDot(
+                    hit.point, 
+                    choice >= 5f && hit.transform.gameObject.tag == "Surroundings" ? Color.blue : 
+                    choice <= 6f && hit.transform.gameObject.tag == "Surroundings" ? Color.cyan :
+                    choice >= 5f && hit.transform.gameObject.tag == "Organics" ? Color.red : 
+                    Color.red
+                );
             }
             else
             {
@@ -149,10 +229,9 @@ public class LiDAR : MonoBehaviour
 
         Destroy(lineObject, 0.008f);
     }
-
+    [SerializeField] float particleSize = 0.006f;
     void PlaceDot(Vector3 pos, Color32 color){
-        float size = 0.05f;
-        liDAR.Emit(pos, noVelocity, size, 120, color);
+        liDAR.Emit(pos, noVelocity, particleSize, 120, color);
     }
 }
 #pragma warning restore 0618
