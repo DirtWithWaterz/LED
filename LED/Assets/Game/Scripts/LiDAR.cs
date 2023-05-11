@@ -97,8 +97,8 @@ public class LiDAR : MonoBehaviour
     //             Debug.DrawLine(ray.origin, hit.point, Color.green);
     //             PlaceDot(
     //                  hit.point, 
-    //                  choice >= 5f && hit.transform.gameObject.tag == "Surroundings" ? Color.blue : 
-    //                  choice <= 6f && hit.transform.gameObject.tag == "Surroundings" ? Color.cyan :
+    //                  choice >= 5f && hit.transform.gameObject.tag == "Surroundings" ? Color.grey : 
+    //                  choice <= 6f && hit.transform.gameObject.tag == "Surroundings" ? Color.white :
     //                  choice >= 5f && hit.transform.gameObject.tag == "Organics" ? Color.red : 
     //                  Color.red
     //              );
@@ -171,8 +171,8 @@ private void RaycastAndDraw(Vector3 direction)
         Debug.DrawLine(ray.origin, hit.point, Color.green);
         PlaceDot(
             hit.point, 
-            choice >= 5f && hit.transform.gameObject.tag == "Surroundings" ? Color.blue : 
-            choice <= 6f && hit.transform.gameObject.tag == "Surroundings" ? Color.cyan :
+            choice >= 5f && hit.transform.gameObject.tag == "Surroundings" ? Color.grey : 
+            choice <= 6f && hit.transform.gameObject.tag == "Surroundings" ? Color.white :
             choice >= 5f && hit.transform.gameObject.tag == "Organics" ? Color.red : 
             Color.red
         );
@@ -207,8 +207,8 @@ private void RaycastAndDraw(Vector3 direction)
                 Debug.DrawLine(ray.origin, hit.point, Color.green);
                 PlaceDot(
                     hit.point, 
-                    choice >= 5f && hit.transform.gameObject.tag == "Surroundings" ? Color.blue : 
-                    choice <= 6f && hit.transform.gameObject.tag == "Surroundings" ? Color.cyan :
+                    choice >= 5f && hit.transform.gameObject.tag == "Surroundings" ? Color.grey : 
+                    choice <= 6f && hit.transform.gameObject.tag == "Surroundings" ? Color.white :
                     choice >= 5f && hit.transform.gameObject.tag == "Organics" ? Color.red : 
                     Color.red
                 );
